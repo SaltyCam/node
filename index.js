@@ -1,28 +1,31 @@
 let express = require('express');
 let app = express();
-let mysql = require('mysql')
+//let mysql = require('mysql')
+let mysql = require('mysql2');
 let cors = require('cors');
 
 app.use(cors());
 app.use(express.json());
 
-let db = mysql.createConnection({
+let ask4 = 'select c.id, c.level, c.class, c.level, c.circlet, c.belt, c.pendant, c.cloak, cb.onyx, cb.zircon, cb.spinel, cb.coral, cb.amber, cb.moonstone, cb.opal, cb.beryl, ca.ignis, ca.petram, ca.nebula, ca.joy, ca.procella, ct.aden, ct.eva, ct.speed, ct.authority, ct.venir from characters.character_details c join characters.character_brooches cb on c.id = cb.id join characters.character_talismans ct on c.id = ct.id join characters.character_agathions ca on c.id = ca.id';
+
+const pool = mysql.createPool({
+    connectionLimit: 10,
+    host: 'notsalty.eu',
     user: 'saltycam',
-    host: '35.217.12.89',
-    port: 3306,
     password: 'password',
-})
+    database: 'characters'    
+});
 
-app.get('/get', (req, res) =>{
-    db.query('select c.id, c.level, c.class, c.level, c.circlet, c.belt, c.pendant, c.cloak, cb.onyx, cb.zircon, cb.spinel, cb.coral, cb.amber, cb.moonstone, cb.opal, cb.beryl, ca.ignis, ca.petram, ca.nebula, ca.joy, ca.procella, ct.aden, ct.eva, ct.speed, ct.authority, ct.venir from characters.character_details c join characters.character_brooches cb on c.id = cb.id join characters.character_talismans ct on c.id = ct.id join characters.character_agathions ca on c.id = ca.id;', (err, result)=>{
-        if(err){
-            console.log(err);
-        } else {
-            res.send(result);
-        }
+
+app.get('/get', (req, res)=> {
+    pool.query(ask4, (err, results)=> {
+        if(err) alert('bug')
+        res.send(results);        
     })
+    
 })
-
+                                
 app.post('/post', (req, res)=> {
     let clas = req.body.clas;
     let level = req.body.level;
@@ -53,7 +56,7 @@ app.post('/post', (req, res)=> {
     let joy = req.body.joy;
     
     
-    db.query("INSERT INTO characters.character_talismans (aden, eva, speed, authority, venir) VALUES (?, ?, ?, ?,?)", [aden, eva, speed, authority, venir],
+    pool.query("INSERT INTO characters.character_talismans (aden, eva, speed, authority, venir) VALUES (?, ?, ?, ?,?)", [aden, eva, speed, authority, venir],
     (err, result)=> {
         if(err){
             console.log(err);
@@ -62,7 +65,7 @@ app.post('/post', (req, res)=> {
         }
     })
     
-    db.query("INSERT INTO characters.character_details (class, level, circlet, belt, pendant,cloak) VALUES (?, ?, ?, ?,?,?)", [clas, level, circlet, belt, pendant, cloak],
+    pool.query("INSERT INTO characters.character_details (class, level, circlet, belt, pendant,cloak) VALUES (?, ?, ?, ?,?,?)", [clas, level, circlet, belt, pendant, cloak],
     (err, result)=> {
         if(err){
             console.log(err);
@@ -74,7 +77,7 @@ app.post('/post', (req, res)=> {
     })
 
 
-    db.query("INSERT INTO characters.character_agathions (ignis, petram, nebula, joy, procella) VALUES (?, ?, ?, ?,?)", [ignis, petram, nebula, joy, procella],
+    pool.query("INSERT INTO characters.character_agathions (ignis, petram, nebula, joy, procella) VALUES (?, ?, ?, ?,?)", [ignis, petram, nebula, joy, procella],
     (err, result)=> {
         if(err){
             console.log(err);
@@ -83,7 +86,7 @@ app.post('/post', (req, res)=> {
         }
     })
 
-    db.query("INSERT INTO characters.character_brooches (onyx, zircon, spinel, coral, amber, moonstone, opal, beryl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [onyx, zircon, spinel, coral, amber, moonstone, opal, beryl],
+    pool.query("INSERT INTO characters.character_brooches (onyx, zircon, spinel, coral, amber, moonstone, opal, beryl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [onyx, zircon, spinel, coral, amber, moonstone, opal, beryl],
     (err, result)=> {
         if(err){
             console.log(err);
